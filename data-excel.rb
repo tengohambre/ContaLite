@@ -31,13 +31,16 @@ Shoes.app :title => "ContaLite", :width => 500, :height => 500, :resizable => fa
 					transaccion.valor=b.text();
 					transaccion.fecha=c.text();
 					transaccion.save
+					puts "Se Agrego ",transaccion.inspect
 		end
 	end
 
 	button "Load from EXCEL" do
 		lectura=1
 		if(lectura==1)
-				workbook = RubyXL::Parser.parse("Book1.xlsx")
+			filename=ask_open_file
+				#workbook = RubyXL::Parser.parse("Book1.xlsx")
+				workbook = RubyXL::Parser.parse(filename)
 				array=workbook.worksheets[0].extract_data
 
 				array.each do |row|
