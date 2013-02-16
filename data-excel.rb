@@ -7,6 +7,17 @@ require 'active_record'
 
 
 Shoes.app :title => "ContaLite", :width => 500, :height => 500, :resizable => false do
+background "#CAE1D6"
+
+@f1=flow :width => 175, :height => 500 do
+	stack :width => 175 do
+		para " "
+		para "Codigo: ",:align => 'right'
+		para "Valor: ",:align => 'right'
+		para "",:size => "xx-small"
+		para "Fecha(AAAA/MM/DD): ",:align => 'right',:size => "medium"
+	end
+end
 
 	ActiveRecord::Base.establish_connection(
 		:adapter => "sqlite3",
@@ -20,10 +31,14 @@ Shoes.app :title => "ContaLite", :width => 500, :height => 500, :resizable => fa
 	class Referencias < ActiveRecord::Base
 		has_many :movimientos
 	end
-	stack do
-		a = edit_line width: 400
-		b = edit_line width: 400
-		c = edit_line width: 400
+
+	@s=stack :width => 200  do
+		para ""
+
+		a = edit_line "Codigo", width: 200
+		b = edit_line "Valor", width: 200
+		c = edit_line "Fecha (AAAA/MM/DD)", :width => 200
+	
 		button "Nuevo Movimiento" do
 				 	transaccion = Movimientos.new
 					transaccion.idMovimiento=nil
@@ -33,60 +48,68 @@ Shoes.app :title => "ContaLite", :width => 500, :height => 500, :resizable => fa
 					transaccion.save
 					puts "Se Agrego ",transaccion.inspect
 		end
-	end
+	
+		para "  "
+		
+		button "Load from EXCEL" do
+			lectura=1
+			if(lectura==1)
+				filename=ask_open_file
+					#workbook = RubyXL::Parser.parse("Book1.xlsx")
+					workbook = RubyXL::Parser.parse(filename)
+					array=workbook.worksheets[0].extract_data
 
-	button "Load from EXCEL" do
-		lectura=1
-		if(lectura==1)
-			filename=ask_open_file
-				#workbook = RubyXL::Parser.parse("Book1.xlsx")
-				workbook = RubyXL::Parser.parse(filename)
-				array=workbook.worksheets[0].extract_data
+					array.each do |row|
+		 				i=1;
+		 				@date=""
+		 				@code=""
+		 				@value=""
+		 				@type=""
 
-				array.each do |row|
-	 				i=1;
-	 				@date=""
-	 				@code=""
-	 				@value=""
-	 				@type=""
+			 			row.each do |cell|
 
-		 			row.each do |cell|
+							case i
+						 		when 1
+		 							@date=cell
+						 		when 2
+		 							@code=cell
+					 			when 3
+						 		when 4
+						 			if(cell!=nil)
+		 								@value=cell
+		 								@type=0
+		 							end
+					 			when 5
+		 							if(cell!=nil)
+		 								@value=cell
+		 								@type=1
+			 						end
+						 		when 6
+						 	end
 
-						case i
-					 		when 1
-	 							@date=cell
-					 		when 2
-	 							@code=cell
-				 			when 3
-					 		when 4
-					 			if(cell!=nil)
-	 								@value=cell
-	 								@type=0
-	 							end
-				 			when 5
-	 							if(cell!=nil)
-	 								@value=cell
-	 								@type=1
-		 						end
-					 		when 6
-					 	end
+		 					i+=1
+		 				end
 
-	 					i+=1
-	 				end
+			 			if(@type==0)
+			 				@value=@value*-1
+		 				end
 
-		 			if(@type==0)
-		 				@value=@value*-1
-	 				end
+		 				print @date," ",@code," ",@value," ",@type,"  \n"
+					 	transaccion = Movimientos.new
+						transaccion.idMovimiento=nil
+						transaccion.idReferencia=@code
+						transaccion.valor=@value
+						transaccion.fecha=@date
+						transaccion.save
+					end
 
-	 				print @date," ",@code," ",@value," ",@type,"  \n"
-				 	transaccion = Movimientos.new
-					transaccion.idMovimiento=nil
-					transaccion.idReferencia=@code
-					transaccion.valor=@value
-					transaccion.fecha=@date
-					transaccion.save
-				end
-
+			end
 		end
+
+		 button ('Close') {exit}
+
+	
 	end
+
+
 end
