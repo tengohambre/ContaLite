@@ -1,92 +1,76 @@
+
+require 'green_shoes'
 require 'rubygems'
 require 'rubyXL'
 require 'sqlite3'
 require 'active_record'
 
-ActiveRecord::Base.establish_connection(
-:adapter => "sqlite3",
-:database => "sample.db"
-)
 
-class Movimientos < ActiveRecord::Base
-belongs_to :referencias
-end
+Shoes.app :title => "ContaLite", :width => 500, :height => 500, :resizable => false do
 
-class Referencias < ActiveRecord::Base
-has_many :movimientos
-end
+	ActiveRecord::Base.establish_connection(
+		:adapter => "sqlite3",
+		:database => "sample.db"
+	)
 
-def last_mov
-	last = Movimientos.find(:last)
-	puts last.inspect
-	#puts "El ultimo movimiento fue ",last.idMovimiento,"  ",last.idReferencia,"  ",last.valor
-end
+	class Movimientos < ActiveRecord::Base
+		belongs_to :referencias
+	end
 
-lectura=1
-if(lectura==1)
+	class Referencias < ActiveRecord::Base
+		has_many :movimientos
+	end
 
-	workbook = RubyXL::Parser.parse("Book1.xlsx")
-	array=workbook.worksheets[0].extract_data
+	button "Load from EXCEL" do
+		lectura=1
+		if(lectura==1)
+				workbook = RubyXL::Parser.parse("Book1.xlsx")
+				array=workbook.worksheets[0].extract_data
 
-	 array.each do |row|
-	 	i=1;
-	 	@date=""
-	 	@code=""
-	 	@value=""
-	 	@type=""
+				array.each do |row|
+	 				i=1;
+	 				@date=""
+	 				@code=""
+	 				@value=""
+	 				@type=""
 
-	 	row.each do |cell|
+		 			row.each do |cell|
 
-	 	
-	 		case i
+						case i
+					 		when 1
+	 							@date=cell
+					 		when 2
+	 							@code=cell
+				 			when 3
+					 		when 4
+					 			if(cell!=nil)
+	 								@value=cell
+	 								@type=0
+	 							end
+				 			when 5
+	 							if(cell!=nil)
+	 								@value=cell
+	 								@type=1
+		 						end
+					 		when 6
+					 	end
 
-	 		when 1
-	 			@date=cell
-	 			#puts cell,"its date" ,"\n\n\n"
+	 					i+=1
+	 				end
 
+		 			if(@type==0)
+		 				@value=@value*-1
+	 				end
 
-	 		when 2
-	 			@code=cell
-	 			#puts cell,"its code","\n\n\n"
+	 				print @date," ",@code," ",@value," ",@type,"  \n"
+				 	transaccion = Movimientos.new
+					transaccion.idMovimiento=nil
+					transaccion.idReferencia=@code
+					transaccion.valor=@value
+					transaccion.fecha=@date
+					transaccion.save
+				end
 
-
-	 		when 3
-	 			#puts cell,"its shit","\n\n\n"
-
-
-	 		when 4
-	 			if(cell!=nil)
-	 				@value=cell
-	 				@type=0
-	 			end
-	 			#puts cell,"its 'egreso'","\n\n\n"
-
-
-	 		when 5
-	 			if(cell!=nil)
-	 				@value=cell
-	 				@type=1
-	 			end
-	 			#puts cell,"its ingreso","\n\n\n"
-
-
-	 		when 6
-	 			#puts cell,"its $$$","\n\n\n"
-	 		end
-	 		 		
-	 		i+=1
-	 	end
-
-	 	if(@type==0)
-	 		@value=@value*-1
-	 	end
-	 	print @date," ",@code," ",@value," ",@type,"  \n"
-	 	transaccion = Movimientos.new
-		transaccion.idMovimiento=nil
-		transaccion.idReferencia=@code
-		transaccion.valor=@value
-		transaccion.fecha=@date
-		transaccion.save
-	 end
-
+		end
+	end
 end
