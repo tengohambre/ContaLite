@@ -20,6 +20,19 @@ Shoes.app :title => "ContaLite", :width => 500, :height => 500, :resizable => fa
 	class Referencias < ActiveRecord::Base
 		has_many :movimientos
 	end
+	stack do
+		a = edit_line width: 400
+		b = edit_line width: 400
+		c = edit_line width: 400
+		button "Nuevo Movimiento" do
+				 	transaccion = Movimientos.new
+					transaccion.idMovimiento=nil
+					transaccion.idReferencia=a.text()
+					transaccion.valor=b.text();
+					transaccion.fecha=c.text();
+					transaccion.save
+		end
+	end
 
 	button "Load from EXCEL" do
 		lectura=1
