@@ -106,6 +106,36 @@ end
 			end
 		end
 
+		button "ADD Code/Desc" do
+			window :title => "New Code adder" do
+				background "#DFA"
+				flow :width => 175, :height => 500 do
+					stack :width => 175 do
+						para " ", :align => "left"
+						para "Codigo: ", :align => "right"
+						para " ", :align => "left", :size => "xx-small"
+						para "Descr: ", :align => "right"
+
+					end
+				end
+				stack :width => 200 do
+					para " "
+					@codigo = edit_line "codigo", :width => 200
+					@desc = edit_line "Descripcion", :width => 200
+
+					button "Agregar Codigo" do
+						
+						nuCode= Referencias.new
+						nuCode.id=@codigo.text
+						nuCode.desc=@desc.text
+						nuCode.save
+						puts "Se agrego ",nuCode.inspect
+					end
+				end
+
+			end
+		end
+
 		 button ('Close') {exit}
 
 	
